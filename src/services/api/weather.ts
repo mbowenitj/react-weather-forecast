@@ -1,86 +1,187 @@
-import type { WeatherData } from '../../types/weather';
+import type { WeatherData } from "../../types/weather";
+import { loadCached, saveCache } from "../../utils/cache";
+import { generateFallbackDays } from "../../utils/weatherFallback.ts";
+import { hashString } from "../../utils/random";
 
-const API_BASE = 'https://api.weatherstack.com';
-const API_KEY = import.meta.env.VITE_WEATHERSTACK_API_KEY || '';
+const API_BASE = "https://api.weatherstack.com";
+const API_KEY = import.meta.env.VITE_WEATHERSTACK_API_KEY || "";
 
 async function fetchCurrentWeather(location: string) {
   const url = `${API_BASE}/current?access_key=${API_KEY}&query=${encodeURIComponent(location)}`;
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`WeatherStack API error: ${response.statusText}`);
+  if (!response.ok) throw new Error(`WeatherStack API error: ${response.status}`);
   return response.json();
 }
 
-async function fetchHistoricalWeather(location: string): Promise<WeatherData['historical']> {
+// Requires Standard plan or higher - not available on free tier
+async function fetchHistoricalWeather(
+  location: string,
+): Promise<WeatherData["historical"]> {
   const today = new Date();
-  const results: WeatherData['historical'] = [];
+  const results: WeatherData["historical"] = [];
 
   for (let daysAgo = 3; daysAgo >= 1; daysAgo--) {
     const date = new Date(today);
     date.setDate(date.getDate() - daysAgo);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
     const url = `${API_BASE}/historical?access_key=${API_KEY}&query=${encodeURIComponent(location)}&historical_date=${dateStr}`;
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.historical?.[dateStr]) {
-        results.push({
-          date: dateStr,
-          date_epoch: Math.floor(date.getTime() / 1000),
-          ...data.historical[dateStr],
-        });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.historical?.[dateStr]) {
+          results.push({
+            date: dateStr,
+            date_epoch: Math.floor(date.getTime() / 1000),
+            ...data.historical[dateStr],
+          });
+        }
       }
+    } catch (error) {
+      console.warn(`Failed to fetch historical data for ${dateStr}`);
     }
   }
   return results;
 }
 
-async function fetchForecastWeather(location: string): Promise<WeatherData['forecast']> {
+// Requires Professional plan or higher - not available on free tier
+async function fetchForecastWeather(
+  location: string,
+): Promise<WeatherData["forecast"]> {
   const url = `${API_BASE}/forecast?access_key=${API_KEY}&query=${encodeURIComponent(location)}&forecast_days=3`;
-  const response = await fetch(url);
-  if (!response.ok) return [];
-  const data = await response.json();
-  if (!data.forecast) return [];
-  return Object.entries(data.forecast).map(([date, dayData]: [string, any]) => ({
-    date,
-    date_epoch: Math.floor(new Date(date).getTime() / 1000),
-    ...dayData,
-  }));
+  
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    const data = await response.json();
+    if (!data.forecast) return [];
+
+    const today = new Date().toISOString().split("T")[0];
+    return Object.entries(data.forecast)
+      .filter(([date]) => date !== today)
+      .map(([date, dayData]: [string, any]) => ({
+        date,
+        date_epoch: Math.floor(new Date(date).getTime() / 1000),
+        ...dayData,
+      }));
+  } catch (error) {
+    console.warn("Failed to fetch forecast data.");
+    return [];
+  }
 }
 
 export async function fetchWeatherData(location: string): Promise<WeatherData> {
+  const normalizedLocation = location.trim().toLowerCase();
+  
+  // Always check cache first
+  const cached = loadCached(normalizedLocation);
+  if (cached) {
+    console.log('Using cached data for', location);
+    return cached;
+  }
+
+  // If no API key, use fallback data
   if (!API_KEY) {
-    throw new Error('No API key configured. Please set VITE_WEATHERSTACK_API_KEY in your .env file.');
+    console.warn("No API key configured. Using fallback data.");
+    const locationSeed = hashString(normalizedLocation);
+    const fallback = generateFallbackDays(20, locationSeed);
+    const weatherData: WeatherData = {
+      location: {
+        name: location,
+        country: "Unknown",
+        region: "Unknown",
+        lat: "0",
+        lon: "0",
+        timezone_id: "UTC",
+        localtime: new Date().toISOString(),
+        localtime_epoch: Math.floor(Date.now() / 1000),
+        utc_offset: "0",
+      },
+      current: {
+        observation_time: new Date().toISOString(),
+        temperature: 20,
+        weather_code: 116,
+        weather_icons: [],
+        weather_descriptions: ["Partly cloudy"],
+        wind_speed: 15,
+        wind_degree: 180,
+        wind_dir: "S",
+        pressure: 1013,
+        precip: 0,
+        humidity: 60,
+        cloudcover: 25,
+        feelslike: 22,
+        uv_index: 5,
+        visibility: 10,
+        is_day: "yes",
+      },
+      historical: fallback.historical,
+      forecast: fallback.forecast,
+    };
+    saveCache(normalizedLocation, weatherData);
+    return weatherData;
   }
 
-  const currentData = await fetchCurrentWeather(location);
-  console.log('Current weather data:', currentData);
-
-  let historical: WeatherData['historical'] = [];
   try {
-    const realHistorical = await fetchHistoricalWeather(location);
-    if (realHistorical.length > 0) historical = realHistorical;
-    console.log('Historical weather data:', historical);
-  } catch {
-    console.log('Historical data not available');
+    console.log('Fetching from API for', location);
+    const currentData = await fetchCurrentWeather(location);
+    const locationSeed = hashString(normalizedLocation);
+    const fallback = generateFallbackDays(
+      currentData.current.temperature,
+      locationSeed,
+    );
+
+    // Use fallback for historical/forecast 
+    const weatherData: WeatherData = {
+      location: currentData.location,
+      current: currentData.current,
+      historical: fallback.historical,
+      forecast: fallback.forecast,
+    };
+
+    saveCache(normalizedLocation, weatherData);
+    return weatherData;
+  } catch (error) {
+    console.warn("API failed, using fallback data:", error);
+    const locationSeed = hashString(normalizedLocation);
+    const fallback = generateFallbackDays(20, locationSeed);
+    const weatherData: WeatherData = {
+      location: {
+        name: location,
+        country: "Unknown",
+        region: "Unknown",
+        lat: "0",
+        lon: "0",
+        timezone_id: "UTC",
+        localtime: new Date().toISOString(),
+        localtime_epoch: Math.floor(Date.now() / 1000),
+        utc_offset: "0",
+      },
+      current: {
+        observation_time: new Date().toISOString(),
+        temperature: 20,
+        weather_code: 116,
+        weather_icons: [],
+        weather_descriptions: ["Partly cloudy"],
+        wind_speed: 15,
+        wind_degree: 180,
+        wind_dir: "S",
+        pressure: 1013,
+        precip: 0,
+        humidity: 60,
+        cloudcover: 25,
+        feelslike: 22,
+        uv_index: 5,
+        visibility: 10,
+        is_day: "yes",
+      },
+      historical: fallback.historical,
+      forecast: fallback.forecast,
+    };
+    saveCache(normalizedLocation, weatherData);
+    return weatherData;
   }
-
-  let forecast: WeatherData['forecast'] = [];
-  try {
-    const realForecast = await fetchForecastWeather(location);
-    if (realForecast.length > 0) forecast = realForecast;
-    console.log('Forecast weather data:', forecast);
-  } catch {
-    console.log('Forecast data not available');
-  }
-
-  const weatherData: WeatherData = {
-    location: currentData.location,
-    current: currentData.current,
-    historical,
-    forecast,
-  };
-
-  console.log('Final weather data:', weatherData);
-  return weatherData;
 }
-
