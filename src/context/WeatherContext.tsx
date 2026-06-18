@@ -18,7 +18,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
   for (const day of data.historical) {
     tiles.push({
       id: `hist-${day.date}`,
-      label: formatDayLabel(day.date, true),
+      label: formatDayLabel(day.date),
       date: day.date,
       temperature: day.temperature,
       weatherCode: day.weather_code,
@@ -30,7 +30,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
 
   tiles.push({
     id: 'current',
-    label: formatDayLabel(new Date().toISOString().split('T')[0], false),
+    label: formatDayLabel(new Date().toISOString().split('T')[0]),
     date: new Date().toISOString().split('T')[0],
     temperature: data.current.temperature,
     weatherCode: data.current.weather_code,
@@ -44,7 +44,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
     if (day.date === today) continue; 
     tiles.push({
       id: `forecast-${day.date}`,
-      label: formatDayLabel(day.date, false),
+      label: formatDayLabel(day.date),
       date: day.date,
       temperature: day.temperature,
       weatherCode: day.weather_code,
