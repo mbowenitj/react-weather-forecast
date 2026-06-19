@@ -28,24 +28,40 @@ export function WeatherLayout() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 animate-fadeIn">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Header onSearch={searchLocation} isLoading={state.isLoading} />
+        <div className="animate-slideInDown">
+          <Header onSearch={searchLocation} isLoading={state.isLoading} />
+        </div>
 
-        {state.error && <ErrorMessage message={state.error} />}
-        {state.isLoading && <LoadingSpinner />}
+        {state.error && (
+          <div className="animate-shake">
+            <ErrorMessage message={state.error} />
+          </div>
+        )}
+        {state.isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin">
+              <LoadingSpinner />
+            </div>
+          </div>
+        )}
 
         {state.weatherData && state.selectedDay && !state.isLoading && (
-          <div className="space-y-6 animate-fadeIn">
-            <WeatherTimeline
-              timeline={state.timeline}
-              selectedId={state.selectedDay.id}
-              onSelect={selectDay}
-            />
-            <WeatherDetails
-              weatherData={state.weatherData}
-              selectedDay={state.selectedDay}
-            />
+          <div className="space-y-6">
+            <div className="animate-slideInUp" style={{ animationDelay: '0.1s' }}>
+              <WeatherTimeline
+                timeline={state.timeline}
+                selectedId={state.selectedDay.id}
+                onSelect={selectDay}
+              />
+            </div>
+            <div className="animate-slideInUp" style={{ animationDelay: '0.2s' }}>
+              <WeatherDetails
+                weatherData={state.weatherData}
+                selectedDay={state.selectedDay}
+              />
+            </div>
           </div>
         )}
 

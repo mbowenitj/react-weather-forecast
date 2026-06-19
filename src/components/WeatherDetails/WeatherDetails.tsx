@@ -165,7 +165,7 @@ export function WeatherDetails({
 
   return (
     <div className="w-full max-w-lg mx-auto animate-fadeIn">
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 animate-slideInDown">
         <h2 className="text-2xl font-bold text-gray-800">
           {weatherData.location.name}{weatherData.location.country !== 'Unknown' ? `, ${weatherData.location.country}` : ''}
         </h2>
@@ -174,15 +174,15 @@ export function WeatherDetails({
         </p>
       </div>
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
         <p className="text-lg font-medium text-gray-600">
           {selectedDay.label} &middot; {formatDate(selectedDay.date)}
         </p>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-sm border border-white/50 mb-6">
+      <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-sm border border-white/50 mb-6 animate-scaleIn" style={{ animationDelay: '0.2s' }}>
         <div className="flex items-center justify-center gap-4">
-          <span className="text-6xl">
+          <span className="text-6xl animate-bounceIn">
             {selectedDay.weatherIcon ? (
               <img src={selectedDay.weatherIcon} alt="" className="w-24 h-24 object-contain" />
             ) : (
@@ -190,7 +190,7 @@ export function WeatherDetails({
             )}
           </span>
           <div>
-            <p className="text-6xl font-bold text-gray-800">
+            <p className="text-6xl font-bold text-gray-800 animate-pulse">
               {formatTemperature(detail.temperature)}
             </p>
             <p className="text-gray-500 mt-1">{detail.description}</p>
@@ -203,10 +203,11 @@ export function WeatherDetails({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {detailItems.map((item) => (
+        {detailItems.map((item, index) => (
           <div
             key={item.label}
-            className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-white/40"
+            className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-white/40 animate-slideInUp hover:scale-105 transition-transform duration-200"
+            style={{ animationDelay: `${0.3 + index * 0.05}s` }}
           >
             <span className="text-xl inline-flex justify-center">
               {item.icon}

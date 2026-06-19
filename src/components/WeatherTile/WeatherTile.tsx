@@ -13,10 +13,10 @@ export const WeatherTile = memo(function WeatherTile({ tile, isSelected, onSelec
   return (
     <button
       onClick={() => onSelect(tile)}
-      className={`flex flex-col items-center gap-1 p-3 rounded-xl min-w-[90px] transition-all duration-200 cursor-pointer
+      className={`flex flex-col items-center gap-1 p-3 rounded-xl min-w-[90px] transition-all duration-300 cursor-pointer
         ${isSelected
-          ? 'bg-blue-500 text-white shadow-lg shadow-blue-200 scale-105'
-          : 'bg-white/80 hover:bg-white hover:shadow-md text-gray-700'
+          ? 'bg-blue-500 text-white shadow-lg shadow-blue-200 scale-105 animate-glow'
+          : 'bg-white/80 hover:bg-white hover:shadow-md hover:scale-105 text-gray-700'
         }
         ${tile.isHistorical ? 'opacity-80' : ''}
       `}
