@@ -10,6 +10,7 @@ A responsive weather forecast application built with React, TypeScript, and Vite
 - **Search** - Search any city worldwide
 - **Fallback Data** - Works without an API key using generated mock data
 - **Caching** - Weather data is cached locally for 24 hours
+- **Unit Tests** - Comprehensive test coverage with Vitest (13 tests)
 
 ## Setup
 
@@ -28,21 +29,10 @@ npm install
 
 ### Optional: API Key
 
-The app works without an API key using generated fallback data. For live weather data, add a WeatherStack API key by creating a `.env` file in the project root:
+The app works without an API key using generated fallback data. For live weather data, add a WeatherStack API key:
 
-**Mac/Linux:**
 ```bash
 echo "VITE_WEATHERSTACK_API_KEY=your_api_key_here" > .env
-```
-
-**Windows (Command Prompt):**
-```cmd
-echo VITE_WEATHERSTACK_API_KEY=your_api_key_here > .env
-```
-
-**Windows (PowerShell):**
-```powershell
-"VITE_WEATHERSTACK_API_KEY=your_api_key_here" | Out-File -FilePath .env
 ```
 
 **Or manually:** Create a file named `.env` in the project root with this content:
@@ -59,6 +49,14 @@ npm run dev
 ```
 
 The app will be available at `http://localhost:5173`.
+
+### Run Tests
+
+```bash
+npm test
+```
+
+This runs the unit test suite with Vitest. Tests are located in `src/_test_/`.
 
 ### Build for Production
 
