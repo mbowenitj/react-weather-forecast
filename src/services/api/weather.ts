@@ -13,66 +13,6 @@ async function fetchCurrentWeather(location: string) {
   return response.json();
 }
 
-// Requires Standard plan or higher - not available on free tier
-async function fetchHistoricalWeather(
-  location: string,
-): Promise<WeatherData["historical"]> {
-  const today = new Date();
-  const results: WeatherData["historical"] = [];
-
-  for (let daysAgo = 3; daysAgo >= 1; daysAgo--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - daysAgo);
-    const dateStr = date.toISOString().split("T")[0];
-    const url = `${API_BASE}/historical?access_key=${API_KEY}&query=${encodeURIComponent(location)}&historical_date=${dateStr}`;
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.historical?.[dateStr]) {
-          results.push({
-            date: dateStr,
-            date_epoch: Math.floor(date.getTime() / 1000),
-            ...data.historical[dateStr],
-          });
-        }
-      }
-    } catch (error) {
-      console.warn(`Failed to fetch historical data for ${dateStr}`);
-    }
-  }
-  return results;
-}
-
-// Requires Professional plan or higher - not available on free tier
-async function fetchForecastWeather(
-  location: string,
-): Promise<WeatherData["forecast"]> {
-  const url = `${API_BASE}/forecast?access_key=${API_KEY}&query=${encodeURIComponent(location)}&forecast_days=3`;
-  
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const response = await fetch(url);
-    if (!response.ok) return [];
-    const data = await response.json();
-    if (!data.forecast) return [];
-
-    const today = new Date().toISOString().split("T")[0];
-    return Object.entries(data.forecast)
-      .filter(([date]) => date !== today)
-      .map(([date, dayData]: [string, any]) => ({
-        date,
-        date_epoch: Math.floor(new Date(date).getTime() / 1000),
-        ...dayData,
-      }));
-  } catch (error) {
-    console.warn("Failed to fetch forecast data.");
-    return [];
-  }
-}
-
 export async function fetchWeatherData(location: string): Promise<WeatherData> {
   const normalizedLocation = location.trim().toLowerCase();
   
@@ -184,4 +124,65 @@ export async function fetchWeatherData(location: string): Promise<WeatherData> {
     saveCache(normalizedLocation, weatherData);
     return weatherData;
   }
+
+  // TODO: Uncomment when using a paid WeatherStack plan that supports historical & forecast endpoints
+// async function fetchHistoricalWeather(
+//   location: string,
+// ): Promise<WeatherData["historical"]> {
+//   const today = new Date();
+//   const results: WeatherData["historical"] = [];
+//
+//   for (let daysAgo = 3; daysAgo >= 1; daysAgo--) {
+//     const date = new Date(today);
+//     date.setDate(date.getDate() - daysAgo);
+//     const dateStr = date.toISOString().split("T")[0];
+//     const url = `${API_BASE}/historical?access_key=${API_KEY}&query=${encodeURIComponent(location)}&historical_date=${dateStr}`;
+//
+//     try {
+//       await new Promise(resolve => setTimeout(resolve, 1000));
+//       const response = await fetch(url);
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.historical?.[dateStr]) {
+//           results.push({
+//             date: dateStr,
+//             date_epoch: Math.floor(date.getTime() / 1000),
+//             ...data.historical[dateStr],
+//           });
+//         }
+//       }
+//     } catch (error) {
+//       console.warn(`Failed to fetch historical data for ${dateStr}`);
+//     }
+//   }
+//   return results;
+// }
+//
+// TODO: Uncomment when using a paid WeatherStack plan that supports forecast
+// async function fetchForecastWeather(
+//   location: string,
+// ): Promise<WeatherData["forecast"]> {
+//   const url = `${API_BASE}/forecast?access_key=${API_KEY}&query=${encodeURIComponent(location)}&forecast_days=3`;
+//
+//   try {
+//     await new Promise(resolve => setTimeout(resolve, 1000));
+//     const response = await fetch(url);
+//     if (!response.ok) return [];
+//     const data = await response.json();
+//     if (!data.forecast) return [];
+//
+//     const today = new Date().toISOString().split("T")[0];
+//     return Object.entries(data.forecast)
+//       .filter(([date]) => date !== today)
+//       .map(([date, dayData]: [string, any]) => ({
+//         date,
+//         date_epoch: Math.floor(new Date(date).getTime() / 1000),
+//         ...dayData,
+//       }));
+//   } catch (error) {
+//     console.warn("Failed to fetch forecast data.");
+//     return [];
+//   }
+// }
+
 }
