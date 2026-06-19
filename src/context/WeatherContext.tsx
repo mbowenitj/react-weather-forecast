@@ -30,8 +30,8 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
 
   tiles.push({
     id: 'current',
-    label: formatDayLabel(new Date().toISOString().split('T')[0]),
-    date: new Date().toISOString().split('T')[0],
+    label: formatDayLabel(new Date().toLocaleDateString('en-CA')),
+    date: new Date().toLocaleDateString('en-CA'),
     temperature: data.current.temperature,
     weatherCode: data.current.weather_code,
     weatherIcon: getWeatherEmoji(data.current.weather_code),
@@ -39,7 +39,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
     isHistorical: false,
   });
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString('en-CA');
   for (const day of data.forecast) {
     if (day.date === today) continue; 
     tiles.push({

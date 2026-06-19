@@ -25,7 +25,7 @@ export function generateFallbackDays(baseTemp: number, locationSeed: number): {
     const tempDelta = (seededRandom(seed + 2) - 0.5) * 10;
 
     historical.push({
-      date: date.toISOString().split('T')[0],
+      date: date.toLocaleDateString('en-CA'),
       date_epoch: Math.floor(date.getTime() / 1000),
       temperature: Math.round((baseTemp + tempDelta) * 10) / 10,
       weather_code: code,
@@ -53,7 +53,7 @@ export function generateFallbackDays(baseTemp: number, locationSeed: number): {
     const tempDelta = (seededRandom(seed + 2) - 0.5) * 12;
 
     forecast.push({
-      date: date.toISOString().split('T')[0],
+      date: date.toLocaleDateString('en-CA'),
       date_epoch: Math.floor(date.getTime() / 1000),
       temperature: Math.round((baseTemp + tempDelta) * 10) / 10,
       weather_code: code,

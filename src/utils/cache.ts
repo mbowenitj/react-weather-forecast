@@ -2,10 +2,12 @@ import type { WeatherData } from '../types/weather';
 
 const CACHE_PREFIX = 'weather_cache';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_VERSION = 2; // Increment to invalidate old caches on schema changes
 
 interface CachedWeather {
   data: WeatherData;
   cachedAt: number;
+  version: number;
 }
 
 export function loadCached(locationKey: string): WeatherData | null {
@@ -13,6 +15,10 @@ export function loadCached(locationKey: string): WeatherData | null {
     const raw = localStorage.getItem(`${CACHE_PREFIX}_${locationKey}`);
     if (!raw) return null;
     const cached: CachedWeather = JSON.parse(raw);
+    if (cached.version !== CACHE_VERSION) {
+      localStorage.removeItem(`${CACHE_PREFIX}_${locationKey}`);
+      return null;
+    }
     if (Date.now() - cached.cachedAt > CACHE_TTL_MS) {
       localStorage.removeItem(`${CACHE_PREFIX}_${locationKey}`);
       return null;
@@ -25,7 +31,7 @@ export function loadCached(locationKey: string): WeatherData | null {
 
 export function saveCache(locationKey: string, data: WeatherData): void {
   try {
-    const entry: CachedWeather = { data, cachedAt: Date.now() };
+    const entry: CachedWeather = { data, cachedAt: Date.now(), version: CACHE_VERSION };
     localStorage.setItem(`${CACHE_PREFIX}_${locationKey}`, JSON.stringify(entry));
   } catch {
     console.warn('Failed to save weather data to cache');

@@ -19,26 +19,20 @@ export function formatPrecip(precip: number): string {
 }
 
 export function formatDayLabel(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const todayStr = today.toLocaleDateString('en-CA');
 
   if (dateStr === todayStr) return 'Today';
-  if (dateStr === yesterdayStr) return 'Yesterday';
-  if (dateStr === tomorrowStr) return 'Tomorrow';
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return days[date.getDay()];
 }
 
 export function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
