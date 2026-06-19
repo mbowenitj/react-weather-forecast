@@ -28,10 +28,26 @@ npm install
 
 ### Optional: API Key
 
-The app works without an API key using generated fallback data. For live weather data, add a WeatherStack API key:
+The app works without an API key using generated fallback data. For live weather data, add a WeatherStack API key by creating a `.env` file in the project root:
 
+**Mac/Linux:**
 ```bash
 echo "VITE_WEATHERSTACK_API_KEY=your_api_key_here" > .env
+```
+
+**Windows (Command Prompt):**
+```cmd
+echo VITE_WEATHERSTACK_API_KEY=your_api_key_here > .env
+```
+
+**Windows (PowerShell):**
+```powershell
+"VITE_WEATHERSTACK_API_KEY=your_api_key_here" | Out-File -FilePath .env
+```
+
+**Or manually:** Create a file named `.env` in the project root with this content:
+```
+VITE_WEATHERSTACK_API_KEY=your_api_key_here
 ```
 
 Get a free API key at [weatherstack.com](https://weatherstack.com).
