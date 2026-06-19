@@ -17,6 +17,7 @@ import {
   FiEye,
 } from "react-icons/fi";
 import { BsThermometerHalf, BsSpeedometer2 } from "react-icons/bs";
+import { WeatherIcon } from "../WeatherIcon/WeatherIcon";
 
 interface WeatherDetailsProps {
   weatherData: WeatherData;
@@ -65,7 +66,7 @@ export function WeatherDetails({
       uvIndex: 0,
       cloudcover: 0,
       description: selectedDay.weatherDescription,
-      icon: selectedDay.weatherIcon,
+      weatherCode: selectedDay.weatherCode,
     };
 
     if (selectedDay.isHistorical) {
@@ -181,7 +182,13 @@ export function WeatherDetails({
 
       <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 shadow-sm border border-white/50 mb-6">
         <div className="flex items-center justify-center gap-4">
-          <span className="text-6xl">{detail.icon}</span>
+          <span className="text-6xl">
+            {selectedDay.weatherIcon ? (
+              <img src={selectedDay.weatherIcon} alt="" className="w-24 h-24 object-contain" />
+            ) : (
+              <WeatherIcon code={detail.weatherCode} />
+            )}
+          </span>
           <div>
             <p className="text-6xl font-bold text-gray-800">
               {formatTemperature(detail.temperature)}

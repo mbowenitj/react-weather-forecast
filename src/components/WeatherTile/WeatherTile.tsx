@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { FiCircle } from 'react-icons/fi';
+import { WeatherIcon } from '../WeatherIcon/WeatherIcon';
 import type { WeatherTileData } from '../../types/weather';
 
 interface WeatherTileProps {
@@ -30,7 +31,13 @@ export const WeatherTile = memo(function WeatherTile({ tile, isSelected, onSelec
           Past
         </span>
       )}
-      <span className="text-2xl my-1">{tile.weatherIcon}</span>
+      <span className="text-2xl my-1">
+        {tile.weatherIcon ? (
+          <img src={tile.weatherIcon} alt="" className="w-10 h-10 object-contain" />
+        ) : (
+          <WeatherIcon code={tile.weatherCode} />
+        )}
+      </span>
       <span className="text-lg font-bold">{Math.round(tile.temperature)}<FiCircle className="inline-block w-1.5 h-1.5" /></span>
       <span className={`text-xs text-center leading-tight line-clamp-2 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
         {tile.weatherDescription}

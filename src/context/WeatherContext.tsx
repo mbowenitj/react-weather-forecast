@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useCallback, useMemo, type ReactNode } from 'react';
 import type { WeatherState, WeatherAction, WeatherData, WeatherTileData } from '../types/weather';
 import { fetchWeatherData } from '../services/api/weather';
-import { formatDayLabel, getWeatherEmoji } from '../utils/formatters';
+import { formatDayLabel } from '../utils/formatters';
 
 const initialState: WeatherState = {
   location: '',
@@ -22,7 +22,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
       date: day.date,
       temperature: day.temperature,
       weatherCode: day.weather_code,
-      weatherIcon: getWeatherEmoji(day.weather_code),
+      weatherIcon: day.weather_icons[0] || '',
       weatherDescription: day.weather_descriptions[0] || '',
       isHistorical: true,
     });
@@ -34,7 +34,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
     date: new Date().toLocaleDateString('en-CA'),
     temperature: data.current.temperature,
     weatherCode: data.current.weather_code,
-    weatherIcon: getWeatherEmoji(data.current.weather_code),
+    weatherIcon: data.current.weather_icons[0] || '',
     weatherDescription: data.current.weather_descriptions[0] || '',
     isHistorical: false,
   });
@@ -48,7 +48,7 @@ function buildTimeline(data: WeatherData): WeatherTileData[] {
       date: day.date,
       temperature: day.temperature,
       weatherCode: day.weather_code,
-      weatherIcon: getWeatherEmoji(day.weather_code),
+      weatherIcon: day.weather_icons[0] || '',
       weatherDescription: day.weather_descriptions[0] || '',
       isHistorical: false,
     });
