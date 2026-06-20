@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useCallback, useMemo, type React
 import type { WeatherState, WeatherAction, WeatherData, WeatherTileData } from '../types/weather';
 import { fetchWeatherData } from '../services/api/weather';
 import { formatDayLabel } from '../utils/formatters';
+import { loadCached, saveCache } from '../utils/cache';
 
 const initialState: WeatherState = {
   location: '',
@@ -98,12 +99,23 @@ export function WeatherProvider({ children }: { children: ReactNode }) {
   const searchLocation = useCallback(async (location: string) => {
     if (!location.trim()) return;
     dispatch({ type: 'SET_LOCATION', payload: location });
-    dispatch({ type: 'FETCH_START' });
+    
+    // Load cached data immediately for instant display
+    const cachedData = loadCached(location);
+    if (cachedData) {
+      dispatch({ type: 'FETCH_SUCCESS', payload: cachedData });
+    } else {
+      dispatch({ type: 'FETCH_START' });
+    }
+    
     try {
       const data = await fetchWeatherData(location);
+      saveCache(location, data);
       dispatch({ type: 'FETCH_SUCCESS', payload: data });
     } catch (err) {
-      dispatch({ type: 'FETCH_ERROR', payload: err instanceof Error ? err.message : 'Failed to fetch weather data' });
+      if (!cachedData) {
+        dispatch({ type: 'FETCH_ERROR', payload: err instanceof Error ? err.message : 'Failed to fetch weather data' });
+      }
     }
   }, []);
 

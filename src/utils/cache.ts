@@ -1,7 +1,7 @@
 import type { WeatherData } from '../types/weather';
 
 const CACHE_PREFIX = 'weather_cache';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL_MS = 1 * 60 * 60 * 1000; // 1 hour
 const CACHE_VERSION = 2; // Increment to invalidate old caches on schema changes
 
 interface CachedWeather {

@@ -33,8 +33,8 @@ function useLiveClock(utcOffset: string) {
       const offsetHours = parseFloat(utcOffset);
       const localMs = now.getTime() + offsetHours * 3600 * 1000;
       const localDate = new Date(localMs);
-      const h = String(localDate.getUTCHours()).padStart(2, "0");
-      const m = String(localDate.getUTCMinutes()).padStart(2, "0");
+      const h = String(localDate.getHours()).padStart(2, "0");
+      const m = String(localDate.getMinutes()).padStart(2, "0");
       return `${h}:${m}`;
     }
 
